@@ -1,0 +1,33 @@
+@media screen and (max-width:375px) {
+    .robot{
+        &-header{
+            margin-top: 0;
+        }
+        &-insert{
+            padding: 10px 10px;
+        }
+    }
+}
+@media screen and (max-width:600px) {
+    .robot{
+        &-header{
+            margin-top: 0;
+        }
+    }
+}
+@media screen and (max-width:840px) {
+    .robot{
+        &-header{
+            &-btn{
+                img{
+                    display: block;
+                }
+            }
+        }
+        &-mic{
+            &-on{
+                transform: translateX(0);
+            }
+        }
+    }
+}

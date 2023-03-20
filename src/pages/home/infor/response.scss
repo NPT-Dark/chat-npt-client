@@ -1,0 +1,108 @@
+@media screen and (max-width:1630px) {
+    .info{
+        &-edit{
+            width: 150px;
+            height: 150px;
+        }
+        &-name{
+            &-text{
+                font-size: 5rem;
+            }
+        }
+    }
+}
+@media screen and (max-width:1300px) {
+    .info{
+        &-edit{
+            width: 100px;
+            height: 100px;
+        }
+        &-name{
+            &-text{
+                font-size: 3rem;
+            }
+        }
+        &-input{
+            &-form{
+                input,select,button{
+                    width: 300px;
+                    height: 60px;
+                    font-size: 15px;
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width:600px) {
+    .info{
+        &-choose-img{
+            right: 10px;
+            &-select{
+                width: 50%;
+                height: 30px;
+            }
+        }
+        &-logout{
+            width: 50px;
+            &:hover{
+                &::after{
+                    transform: translateX(5px);
+                }
+                color: transparent;
+            }
+        }
+        &-edit{
+            width: 100px;
+            height: 100px;
+        }
+        &-name{
+            padding: 0;
+            &-text{
+                font-size: 1.5rem;
+            }
+        }
+    }
+}
+@media screen and (max-width:840px) {
+    .info{
+        padding-right: 30px;
+        &-menu{
+            display: block;
+            }
+            &-input{
+                &-form{
+                    input,select,button{
+                        width: 300px;
+                        height: 50px;
+                        margin: 10px 0;
+                        font-size: 15px;
+                    }
+                }
+            }
+        }
+}
+
+
+@media screen and (max-width:375px) {
+    .info{
+        padding-right: 30px;
+        &-name{
+            margin-top: 30px;
+        }
+        &-edit{
+            width: 70px;
+            height: 70px;
+            &-ava{
+                width: 70px;
+                height: 70px;
+            }
+        }
+        &-input{
+            margin-top: 50px;
+        }
+        &-logout{
+            top: 20px;
+            right: 20px;
+        }
+    }
+}

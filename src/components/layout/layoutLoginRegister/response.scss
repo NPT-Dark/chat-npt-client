@@ -1,0 +1,8 @@
+@media screen and (max-width:1260px) {
+    .login-register{
+        &-icon-left,&-icon-right,&-icon-bottom{
+            opacity: 0.5;
+            z-index: 0;
+        }
+    }
+}

@@ -1,0 +1,57 @@
+@media screen and (max-width:840px) {
+    .home{
+        &-menu{
+           top: 0;
+           border-radius: 0;
+           height: 100%;
+           width: 100%;
+           padding: 0;
+           margin: 0;
+           height: 100%;
+           transform: translateX(-110%);
+           transition: all 0.5s ease-in-out;
+           .close{
+            display: flex;
+            justify-content: flex-end;
+            img{
+                width: 40px;
+                height: 40px;
+            }
+           }
+           &-item{
+                width: 100%;
+                justify-content: flex-start;
+                &-title{
+                    width: fit-content;
+                }
+                img{
+                    width: 50px;
+                    height: 50px;
+                }
+           }
+        }
+        &-page{
+            margin: 0;
+        }
+        .robot-chat{
+            padding: 10px 20px;
+        }
+        .showMenu{
+            transform: translateX(0);
+        }
+    }
+    .home-menu-item:hover .active-title {
+        border-right: none;
+    }
+}
+@media screen and (max-width:375px) {
+    .message{
+        margin: 10px 0;
+        &-box{
+            &-text{
+                padding: 10px 20px;
+                max-width: 250px;
+            }
+        }
+    }
+}

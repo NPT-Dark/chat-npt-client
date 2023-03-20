@@ -1,0 +1,9 @@
+@media screen and (max-width:1350px) {
+    .chat-card{
+        flex-direction: column;
+        height: fit-content;
+        &-img{
+            margin-bottom: 7px;
+        }
+    }
+}

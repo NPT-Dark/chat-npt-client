@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900');
+.info{
+    position: relative;
+    padding-top: 20px;
+    padding-left: 40px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    &-choose-img{
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        top: 60px;
+        right: 50px;
+        width: 150px;
+        height: 100px;
+        padding: 0 5px;
+        &-select{
+            width: 100%;
+            height: 40px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-bottom: 10px;
+            outline: none;
+            text-align: center;
+        }
+        label{
+            font-size: 15px;
+            color: white;
+        }
+        option{
+            font-size: 20px;
+            cursor: pointer;
+        }
+    }
+    &-logout{
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 50px;
+        width: 150px;
+        height: 50px;
+        font-size: 17px;
+        border-radius: 15px;
+        border: 1px solid transparent;
+        padding-bottom: 10px;
+        color: transparent;
+        transition: all 0.5s ease-in-out 0.3s;
+        font-family: "IRANSansXFaNum";
+        font-weight: 500;
+        &::after{
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            content: "";
+            background-size: 40px 40px;
+            height: 100%;
+            background-image: url(https://cdn-icons-png.flaticon.com/512/8048/8048157.png);
+            background-repeat: no-repeat;
+            width:40px;
+            top: 0;
+            transform: translateX(5px);
+            transition: all 0.8s ease-in-out;
+        }
+        &::before{
+            position: absolute;
+            content: "Log out";
+            background-color: #03a9f4;
+            left: 0;
+            top: 0;
+            border-radius: 15px;
+            padding: 0 5px;
+            color: black;
+            transition: all 0.5s ease-in-out;
+            background-position: 5px;
+            animation: animate 4s ease-in-out infinite;
+            width:calc(100% - 10px);
+            height: 100%;
+        }
+        &:hover{
+            &::before{
+                color: white;
+                background-position: 100px;
+            }
+            &::after{
+                transform: translateX(105px);
+            }
+            color: black;
+        }
+    }
+    &-menu{
+        position: absolute;
+        width: 100%;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        display: none;
+        img{
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+    }
+    &-edit{
+        position: relative;
+        width: 200px;
+        height: 200px;
+        z-index: 0;
+       &-input-ava{
+        display: none;
+       }
+        &:hover{
+            .info-edit-label{
+                display: block;
+            }
+        }
+        &-ava{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+    }
+    &-name{
+        width: 100%;
+        font-family: 'Poppins',sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-top: 50px;
+        &-text{
+            position: absolute;
+            color: #fff;
+            font-size: 8rem;
+        }
+        &-text:nth-child(1){
+            color: transparent;
+            -webkit-text-stroke: 2px #03a9f4;
+        }
+        &-text:nth-child(2){
+            color: #03a9f4;
+            animation: animate 4s ease-in-out infinite;
+        }
+    }
+    &-input{
+        margin-top:100px ;
+        &-form{
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            flex-wrap: wrap;
+            input,select,&-edit{
+                width: 500px;
+                height: 70px;
+                margin: 20px 0;
+                padding: 0 20px;
+                font-size: 20px;
+                border-radius: 10px;
+                outline: none;
+                border: none;
+                box-shadow: -1px -1px 3px #fff,
+                1px 1px 3px #bebebe,
+                inset 1px 1px 3px #fff,
+                inset 5px 5px 20px #202b4f
+            }
+            select:invalid {
+                color: #999999;
+                text-transform: capitalize;
+                font-family: "IRANSansXFaNum";
+            }
+            select{
+                cursor: pointer;
+                text-transform: capitalize;
+            }
+            option{
+                color: black;
+                text-transform: capitalize;
+            }
+            &-edit{
+                color: white;
+                background: #202b4f;
+                cursor: pointer;
+                box-shadow: -1px -1px 3px #fff,
+                1px 1px 3px #202b4f,
+                inset -5px -5px 3px  #202b4f ,
+                inset 5px 5px 10px #fff 
+            }
+        }
+    }
+}
+@keyframes animate {
+    0%,100%{
+        clip-path: polygon(0% 45%, 15% 44%, 32% 50%,54% 60%,70% 61%,84% 59%,100% 52%,100% 100%,0% 100%);
+    }
+    50%{
+        clip-path: polygon(0% 60%, 16% 65%,34% 66%, 51% 62%, 67% 50%,84% 45%,100% 46%,100% 100%,0% 100%);
+    }
+}

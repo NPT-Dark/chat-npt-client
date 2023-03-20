@@ -1,0 +1,128 @@
+@mixin centerAlign {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login {
+  position: relative;
+  overflow: hidden;
+  @include centerAlign;
+  &-form {
+    @include centerAlign;
+    flex-direction: column;
+    width: 531px;
+    z-index: 1;
+    &-changepass {
+      position: absolute;
+      bottom: 0;
+    }
+    &-title {
+      color: #ffffff;
+      width: 100%;
+      height: fit-content;
+      font-weight: 400;
+      font-size: 96px;
+      line-height: 96px;
+      font-family: "JK Abode";
+      margin-bottom: 118px;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    &-username,
+    &-password {
+      background: none;
+      border: none;
+      border-bottom: 1px solid #ffffff;
+      outline: none;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+      font-weight: 400;
+      font-size: 24px !important;
+      line-height: 36px;
+      -webkit-text-size-adjust: 24px;
+      -webkit-text-fill-color: white;
+      -webkit-box-shadow: none;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    &-username,
+    &-password,
+    &-button {
+      color: white;
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 36px;
+      width: 100%;
+      height: 56px;
+    }
+    &-button {
+      border: 1px solid #4044ed;
+      background: #4044ed;
+    }
+    &-username {
+      margin-bottom: 44px;
+    }
+    &-password {
+      margin-bottom: 20px;
+    }
+    &-username::placeholder,
+    &-password::placeholder {
+      color: #999999;
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 36px;
+      text-transform: capitalize;
+      font-family: "IRANSansXFaNum";
+    }
+    &-sub {
+      @include centerAlign;
+      color: rgb(223, 213, 213);
+      font-family: "IRANSansXFaNum";
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-bottom: 44px;
+      &-changepass {
+        font-style: italic;
+        cursor: pointer;
+        text-underline-offset: 3px;
+        transition: all 0.8s linear;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+      &-register {
+        width: fit-content;
+        display: flex;
+        nav {
+          margin: 0 5px;
+        }
+        nav:nth-child(2) {
+          font-style: italic;
+          cursor: pointer;
+          text-underline-offset: 3px;
+          transition: all 0.8s linear;
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+    &-button {
+      cursor: pointer;
+      transition: all 0.1s linear;
+      font-family: "IRANSansXFaNum";
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+}

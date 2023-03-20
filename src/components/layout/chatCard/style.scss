@@ -1,0 +1,68 @@
+.chat-card{
+    position: relative;
+    margin-bottom: 15px;
+    width: 100%;
+    height: 80px;
+    background: #1f2747;
+    border-radius: 10px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    &-info{
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        flex-direction: column;
+        margin-left: 10px;               
+        font-family: 'Roboto', sans-serif;
+        &-name{
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            p{
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: red;
+                margin-left: 7px;
+            }
+        }
+        &-message{
+            font-size: 13px;
+            width:  170px;
+        }
+    }
+    &-img{
+        width: 60px;
+        height: 100%;
+        border-radius: 50%;
+    }
+    &-status{
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        right: 15px;
+        &-time{
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+        &-count{
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            font-size: 10px;
+            background: red;
+            border-radius: 50%;
+            padding: 2px 5px;
+        }
+    }
+}
+.active{
+    background: linear-gradient(to right , #ea6646,#27306c);
+}

@@ -1,0 +1,66 @@
+@mixin centerAlign {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-register {
+    position: relative;
+    overflow: hidden;
+    @include centerAlign;
+    &-icon-left {
+      position: absolute;
+      width: 750px;
+      height: 750px;
+      background: #4044ed;
+      border-radius: 50%;
+      left: -480px;
+      top: 50%;
+      margin: auto 0;
+      transform: translateY(-50%);
+      &::after {
+        content: "";
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: #93dfff;
+        top: 50px;
+        right: 70px;
+        border-radius: 50%;
+      }
+    }
+    &-icon-bottom {
+      position: absolute;
+      @include centerAlign;
+      flex-direction: column;
+      bottom: -20px;
+      right: 80px;
+      transform: rotate(-50deg);
+      &-triangle {
+        width: 0;
+        height: 0;
+        border-left: 120px solid transparent;
+        border-right: 120px solid transparent;
+        border-bottom: 200px solid #4044ed80;
+        margin-bottom: -70px;
+      }
+    }
+    &-icon-right {
+      position: absolute;
+      width: 1000px;
+      height: 1000px;
+      border-radius: 50%;
+      background: #4044ed;
+      @include centerAlign;
+      flex-direction: column;
+      top: -700px;
+      right: -550px;
+      transform: rotate(-45deg);
+      &-round-stripe {
+        width: 100%;
+        height: 50px;
+        margin-top: 50px;
+        background: #27262c;
+      }
+    }
+  }
+  

@@ -1,0 +1,105 @@
+@media screen and (max-width:375px) {
+    .chatbox{
+        &-header{
+            margin-top: 0;
+        }
+        &-insert{
+            padding: 10px 10px;
+        }
+    }
+}
+@media screen and (max-width:600px) {
+    .chatbox{
+        &-header{
+            margin-top: 0;
+        }
+    }
+}
+@media screen and (max-width:1350px) {
+    .menu-chat{
+        min-width: 200px;
+    }
+    .chatbox{
+        &-chat{
+            padding: 10px 20px;
+        }
+    }
+}
+@media screen and (max-width:840px) {
+    .menu-chat{
+        width: 100%;
+        z-index: 0;
+        &-header{
+            justify-content: center;
+            margin-bottom: 20px;
+            &-btn{
+                display: block;
+                cursor: pointer;
+            }
+        }
+    }
+    .chatbox{
+        width: 100%;
+        z-index: 1;
+        background: #202b4f;
+        position: absolute;
+        transform: translateX(-100%);
+        transition: all 0.5s ease-in-out;
+        &-header{
+            &-btn-back{
+                display: block;
+                cursor: pointer;
+            }
+        }
+    }
+    .activeChatBoxResponse{
+        transform: translateX(0);
+    }
+    .show{
+        transform: translateX(100%);
+    }
+}
+@media screen and (max-height:667px) {
+    .chatbox{
+        &-insert{
+            height: 8%;
+            &-box-input{
+                padding-top: 5px;
+            }
+            &-box-voice{
+                padding: 5px 10px;
+            }
+        }
+    }
+}
+@media screen and (max-height:720px) {
+    .chatbox{
+        &-insert{
+            padding: 5px 10px;
+            height: 8%;
+            &-box-input{
+                padding-top: 10px;
+            }
+            &-box-voice{
+                padding: 5px 10px;
+            }
+        }
+    }
+}
+@media screen and (max-width:280px) {
+    .chatbox{
+        &-insert{
+            padding: 5px 10px;
+            height: 8%;
+            &-box{
+                width: 100%;
+            }
+            &-box-input{
+                padding-top: 10px;
+            }
+            &-box-voice{
+                padding: 5px 10px;
+            }
+        }
+    }
+}

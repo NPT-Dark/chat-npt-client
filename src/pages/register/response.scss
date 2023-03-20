@@ -1,0 +1,9 @@
+@media screen and (max-width:600px) {
+    .register-form{
+        width: 300px !important;
+        &-title{
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+    }
+}
