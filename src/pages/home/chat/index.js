@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Message from "../../../components/layout/message";
 import { CardChat, DataChat } from "../../../Data/testChat";
@@ -7,18 +7,42 @@ import "./response.scss"
 import ChatCard from "../../../components/layout/chatCard";
 import StatusCard from "../../../components/statusCard";
 // import { Mic } from "../../../components/layout/Mic";
+import { SocketIO } from "../../..";
 function Chat() {
     const {transcript,resetTranscript} = useSpeechRecognition();
+    const socketIO = useContext(SocketIO)
     const [active,setActive] = useState(false);
     const [contact,setContact] = useState(CardChat[0])
     const [showPopup,setShowPopup] = useState(true)
+    const [chat,setChat] = useState({
+        id_Room:"123",
+        id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
+        message:""
+    })
     function ChatBox(item){
         setContact(item);
         setShowPopup(true);
+        socketIO.emit("join_room","123")
     }
     function showMenu(){
         document.getElementById("home-menu").classList.toggle("showMenu");
     }
+    function InputChat(e){
+        setChat({
+            ...chat,
+            message:e.target.value
+        })
+    }
+    async function SendChat(e){
+        if(e.key === "Enter"){
+            await socketIO.emit("send_message",chat)
+        }
+    }
+    useEffect(()=>{
+        socketIO.on("receive_message",(data)=>{
+            console.log(data);
+        })
+    },[socketIO])
     return (
         <>
         <div className="menu-chat">
@@ -59,7 +83,7 @@ function Chat() {
             </div>
             <div className="chatbox-insert">
                 <div className="chatbox-insert-box">
-                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false}/>
+                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {InputChat} onKeyUp = {SendChat}/>
                     <img className="chatbox-insert-box-voice" src="https://cdn-icons-png.flaticon.com/512/9499/9499020.png" alt="voice"/>
                 </div>
             </div>

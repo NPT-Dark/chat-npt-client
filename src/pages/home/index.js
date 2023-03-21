@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./style.scss";
 import "./response.scss"
 import { itemMenu } from "../../Data/MenuHome";
 import { useNavigate } from "react-router-dom";
+import { CheckLogin } from "../../components/checkLogin";
 function Home() {
  document.title = "Chat NPT - Home";
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
+  useEffect(()=>{
+    var checkToken = false;
+    async function Check(){
+      checkToken = await CheckLogin();
+      if(checkToken === false)goto("/")
+    }
+    Check()
+  },[goto])
   function ActiveItem(item) {
     goto(`/home${item.link}`);
     setActive(item);
