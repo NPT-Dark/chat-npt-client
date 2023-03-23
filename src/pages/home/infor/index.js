@@ -6,6 +6,8 @@ import { useToasts } from "react-toast-notifications";
 import { BaseUrl } from "../../../components/Api/baseUrl";
 import { useEffect } from "react";
 import Loading from "../../../components/layout/loading";
+import { useContext } from "react";
+import { UserDetails } from "..";
 function Infor() {
   const [data,setData] = useState(null)
   const goto = useNavigate();
@@ -13,19 +15,10 @@ function Infor() {
   function showMenu() {
     document.getElementById("home-menu").classList.toggle("showMenu");
   }
+  const userDetails = useContext(UserDetails)
   useEffect(()=>{
-    async function GetUser(){
-      await BaseUrl.post("/user/getuser",{
-        token:localStorage.getItem("token")
-      }).then(function (response) {   
-        setData(response.data)
-      })
-      .catch(function (error) {
-          throw new Error(error.message)
-      });
-    }
-    GetUser()
-  },[])
+    setData(userDetails)
+  },[userDetails])
   function LogOut(){
     addToast("You are leaving !", {
       appearance: 'info',

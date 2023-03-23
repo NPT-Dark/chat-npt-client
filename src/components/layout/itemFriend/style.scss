@@ -1,0 +1,68 @@
+.item-friend{
+    position: relative;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    background: #1f2747;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 10px;
+    box-shadow: 2px 2px 5px rgba(255, 255, 255, 0.575);
+    cursor: pointer;
+    &-detail{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin-left: 20px;
+        nav{
+            color: white;
+            margin: 1px 0;
+        }
+    }
+    img{
+        width: 80px;
+        height: 100%;
+        border-radius: 50%;
+    }
+    button{
+        margin-top: 10px;;
+        padding: 5px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.05s linear;
+        background: linear-gradient(to right, #ea6646, #27306c);
+        color: white;
+        border: none;
+        &:hover{
+            transform: scale(1.05);
+        }
+    }
+    &-btn{
+        display: flex;
+        width: 70%;
+        justify-content: space-between;
+        margin-top: 10px;
+        &-accept{
+            background: linear-gradient(to right, #37b83b, #08872e) !important;
+        }
+        &-deny{
+            background: linear-gradient(to right, #d52626, #ae3f21) !important;
+        }
+        &-cancel{
+            background: linear-gradient(to right, #666363, #504f4e) !important;
+        }
+        button{
+            flex: 1;
+            padding: 5px;
+            font-size: 15px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: all 0.05s linear;
+            color: white;
+            border: none;
+            &:hover{
+                transform: scale(1.05);
+            }
+        }
+    }
+}

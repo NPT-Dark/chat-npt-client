@@ -22,7 +22,6 @@ function Chat() {
     function ChatBox(item){
         setContact(item);
         setShowPopup(true);
-        socketIO.emit("join_room","123")
     }
     function showMenu(){
         document.getElementById("home-menu").classList.toggle("showMenu");

@@ -1,4 +1,5 @@
 import Chat from "../pages/home/chat";
+import Friends from "../pages/home/friend";
 import Infor from "../pages/home/infor";
 import Robot from "../pages/home/robot";
 
@@ -23,5 +24,12 @@ export const itemMenu = [
         url:"https://cdn-icons-png.flaticon.com/512/7676/7676710.png",
         link:"/chat",
         page:<Chat/>
+    },
+    {
+      id:4,
+      name:"Friends",
+      url:"https://cdn-icons-png.flaticon.com/512/10075/10075512.png",
+      link:"/friend",
+      page:<Friends/>
     }
   ]

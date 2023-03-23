@@ -4,18 +4,54 @@ import "./response.scss"
 import { itemMenu } from "../../Data/MenuHome";
 import { useNavigate } from "react-router-dom";
 import { CheckLogin } from "../../components/checkLogin";
+import { useContext } from "react";
+import { SocketIO } from "../..";
+import { BaseUrl } from "../../components/Api/baseUrl";
+import { createContext } from "react";
+import { useToasts } from "react-toast-notifications";
+export const UserDetails = createContext()
 function Home() {
  document.title = "Chat NPT - Home";
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
+  const [data,setData] = useState()
+  const socketIO = useContext(SocketIO)
+  const { addToast } = useToasts();
+  useEffect(() => {
+    socketIO.on("receive_invitation", (data) => {
+      addToast(
+        `You received a friend request from ${
+          data.user.firstName + " " + data.user.lastName
+        }`,
+        {
+          appearance: "info",
+          autoDismiss: true,
+        }
+      );
+    });
+  }, [socketIO, addToast]);
   useEffect(()=>{
     var checkToken = false;
     async function Check(){
       checkToken = await CheckLogin();
       if(checkToken === false)goto("/")
+      else if(checkToken === true){
+        async function GetUser(){
+          await BaseUrl.post("/user/getuser",{
+            token:localStorage.getItem("token")
+          }).then(function (response) {   
+            setData(response.data)
+            socketIO.emit("join_room",response.data.id)
+          })
+          .catch(function (error) {
+              throw new Error(error.message)
+          });
+        }
+        GetUser()
+      }
     }
     Check()
-  },[goto])
+  },[goto,socketIO])
   function ActiveItem(item) {
     goto(`/home${item.link}`);
     setActive(item);
@@ -24,6 +60,7 @@ function Home() {
       document.getElementById("home-menu").classList.toggle("showMenu");
   }
   return (
+    <UserDetails.Provider value={data}>
     <main className="home">
       <div className="home-menu" id = "home-menu">
         <nav className="home-menu-item close">
@@ -56,6 +93,7 @@ function Home() {
       </div>
       <div className="home-page">{active.page}</div>
     </main>
+    </UserDetails.Provider>
   );
 }
 
