@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./style.scss";
 import "./response.scss"
 import { itemMenu } from "../../Data/MenuHome";
@@ -17,7 +17,7 @@ function Home() {
   const [data,setData] = useState()
   const socketIO = useContext(SocketIO)
   const { addToast } = useToasts();
-  useEffect(() => {
+  const RequestSocket = useCallback(()=>{
     socketIO.on("receive_invitation", (data) => {
       addToast(
         `You received a friend request from ${
@@ -29,7 +29,7 @@ function Home() {
         }
       );
     });
-  }, [socketIO, addToast]);
+  },[addToast,socketIO])
   useEffect(()=>{
     var checkToken = false;
     async function Check(){
@@ -51,7 +51,10 @@ function Home() {
       }
     }
     Check()
-  },[goto,socketIO])
+  },[goto,socketIO,addToast])
+  useEffect(()=>{
+    RequestSocket();
+  },[RequestSocket])
   function ActiveItem(item) {
     goto(`/home${item.link}`);
     setActive(item);

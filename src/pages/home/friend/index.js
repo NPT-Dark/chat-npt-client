@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { BaseUrl } from "../../../components/Api/baseUrl";
 import ItemFriend from "../../../components/layout/itemFriend";
 import { useToasts } from "react-toast-notifications";
@@ -18,35 +18,9 @@ function Friends() {
   function InputSearch(e) {
     setData(e.target.value);
   }
-  useEffect(() => {
+  const findFriends = async () => {
     setLoad(true);
-    BaseUrl.post("/user/finduser", {
-      firstName: "",
-      lastName: "",
-      id: userdt.id,
-    })
-      .then(function (response) {
-        setUser(response.data);
-        setLoad(false);
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        addToast(error.response.data, {
-          appearance: "info",
-          autoDismiss: true,
-        });
-        setUser([]);
-        setLoad(false);
-      });
-  }, [addToast, userdt.id]);
-  async function findFriends() {
-    console.log({
-      firstName: data.split(" ")[0] || "",
-      lastName: data.split(" ")[1] || "",
-      id: userdt.id,
-    });
-    setLoad(true);
-    BaseUrl.post("/user/finduser", {
+    await BaseUrl.post("/user/finduser", {
       firstName: data.split(" ")[0] || "",
       lastName: data.split(" ")[1] || "",
       id: userdt.id,
@@ -63,7 +37,8 @@ function Friends() {
         setUser([]);
         setLoad(false);
       });
-  }
+  };
+  //Socket IO
   async function AddFriends(id, firstName, lastName) {
     await socketIO.emit("join_room", id);
     await socketIO.emit("send_invitation", {
@@ -77,8 +52,31 @@ function Friends() {
         autoDismiss: true,
       }
     );
-    findFriends();
+    await findFriends();
   }
+  async function CancelFriend(id,type) {
+    await socketIO.emit("join_room", id);
+    await socketIO.emit("send_cancel_invitation", {
+      id_User_Recieve: type === "cancel" ? id : userdt.id,
+      id_User_Send: type === "cancel" ? userdt.id : id,
+    });
+    addToast(`Cancel successfull !`, {
+      appearance: "info",
+      autoDismiss: true,
+    });
+    await findFriends();
+  }
+  useEffect(() => {
+    socketIO.on("receive_cancel_invitation", async() => {
+      await findFriends();
+    });
+    socketIO.on("receive_invitation", async() => {
+      await findFriends();
+    });
+  }, [socketIO, addToast]);
+  useEffect(()=>{
+    findFriends()
+  },[])
   return (
     <>
       {load && <Loading />}
@@ -120,11 +118,16 @@ function Friends() {
               email={item.email}
             >
               {item.status === "send" ? (
-                <button className="item-friend-btn-cancel">Cancel</button>
+                <button
+                  className="item-friend-btn-cancel"
+                  onClick={() => CancelFriend(item.id,"cancel")}
+                >
+                  Cancel
+                </button>
               ) : item.status === "recieve" ? (
                 <div className="item-friend-btn">
                   <button className="item-friend-btn-accept">Accept</button>
-                  <button className="item-friend-btn-deny">Deny</button>
+                  <button className="item-friend-btn-deny" onClick={() => CancelFriend(item.id,"deny")}>Deny</button>
                 </div>
               ) : (
                 <button
