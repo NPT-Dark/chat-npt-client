@@ -14,6 +14,10 @@
         justify-content: center;
         flex-direction: column;
         margin-left: 20px;
+        p{
+            font-size: 20px;
+            color: green;
+        }
         nav{
             color: white;
             margin: 1px 0;
@@ -39,11 +43,14 @@
     }
     &-btn{
         display: flex;
-        width: 70%;
+        width: 100%;
         justify-content: space-between;
         margin-top: 10px;
         &-accept{
             background: linear-gradient(to right, #37b83b, #08872e) !important;
+        }
+        &-unfriend{
+            background: linear-gradient(to right, #3e77b9, #044497) !important;
         }
         &-deny{
             background: linear-gradient(to right, #d52626, #ae3f21) !important;

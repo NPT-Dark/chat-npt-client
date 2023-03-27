@@ -41,6 +41,9 @@ function Chat() {
         socketIO.on("receive_message",(data)=>{
             console.log(data);
         })
+        socketIO.on("receive_accept_invitation", async(data) => {
+            console.log(data)
+        });
     },[socketIO])
     return (
         <>

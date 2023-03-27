@@ -29,7 +29,19 @@ function Home() {
         }
       );
     });
-  },[addToast,socketIO])
+    socketIO.on("receive_accept_invitation", (data) => {
+      addToast(data, {
+        appearance: "info",
+        autoDismiss: true,
+      });
+    });
+    socketIO.on("receive_unfriend", (data) => {
+      addToast(data, {
+        appearance: "info",
+        autoDismiss: true,
+      });
+    });
+  },[socketIO])
   useEffect(()=>{
     var checkToken = false;
     async function Check(){
@@ -51,7 +63,7 @@ function Home() {
       }
     }
     Check()
-  },[goto,socketIO,addToast])
+  },[goto,socketIO])
   useEffect(()=>{
     RequestSocket();
   },[RequestSocket])
