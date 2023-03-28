@@ -16,12 +16,6 @@ function StatusCard(status) {
                 text:"online"
             }
             break;
-        case 2:
-            item = {
-                color:"#F94A29",
-                text:"busy"
-            }
-            break;
         default:
             break;
     }

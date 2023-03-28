@@ -8,11 +8,17 @@ import Loading from "../../../components/layout/loading";
 import { Gender } from "../../../components/textGender";
 import { SocketIO } from "../../..";
 import { UserDetails } from "..";
+import Modal from "../../../components/layout/modal/modal";
 function Friends() {
   const { addToast } = useToasts();
   const [data, setData] = useState("");
   const [user, setUser] = useState([]);
   const [load, setLoad] = useState(false);
+  const [unfriend,setUnfriend] = useState({
+    status:false,
+    id:"",
+    name:""
+  });
   const [select,setSelect] = useState("find")
   const socketIO = useContext(SocketIO);
   const userdt = useContext(UserDetails);
@@ -80,17 +86,22 @@ function Friends() {
       autoDismiss: true,
     });
   }
-  async function Unfriend(id_Unfriend){
-    await socketIO.emit("join_room", id_Unfriend);
+  async function Unfriend(){
+    await socketIO.emit("join_room", unfriend.id);
     await socketIO.emit("send_unfriend",{
       id_User_Owner:userdt.id,
-      id_User_Unfriend:id_Unfriend,
+      id_User_Unfriend:unfriend.id,
     });
     await findFriends();
     addToast(`Unfriend successfull !`, {
       appearance: "info",
       autoDismiss: true,
     });
+    setUnfriend({
+      status:false,
+      name:"",
+      id:""
+    })
   }
   
   const SocketResponse = useCallback(()=>{
@@ -103,12 +114,12 @@ function Friends() {
     socketIO.on("receive_invitation", async() => {
       await findFriends();
     });
-    socketIO.on("receive_unfriend", async(data) => {
-      findFriends();
+    socketIO.on("receive_unfriend", async() => {
+      await findFriends();
     });
   },[socketIO])
   useEffect(() => {
-    SocketResponse()
+    SocketResponse();
   }, [SocketResponse]);
   useEffect(()=>{
     findFriends()
@@ -116,6 +127,10 @@ function Friends() {
   return (
     <>
       {load && <Loading />}
+      {unfriend.status && <Modal title={"Unfriend"} content={`Are you sure you want to unfriend ${unfriend.name} ?`} clickSure = {()=>Unfriend()} clickCancel = {()=>setUnfriend({
+        ...unfriend,
+        status:false
+      })}/>}
       <div className="friend">
         <div className="friend-header">
           <div className="friend-header-search">
@@ -169,7 +184,13 @@ function Friends() {
               ) : (
                 item.status === "friend" ? <div className="item-friend-btn">
                   <p>My Friend !</p>
-                  <button className="item-friend-btn-unfriend" onClick={()=>Unfriend(item.id)}>UnFriend</button>
+                  <button className="item-friend-btn-unfriend" onClick={()=>{
+                    setUnfriend({
+                      status:true,
+                      id:item.id,
+                      name:item.firstName + " " + item.lastName
+                    })
+                  }}>UnFriend</button>
                 </div> :
                 <button
                   onClick={() =>

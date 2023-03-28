@@ -11,6 +11,10 @@ import { createContext } from "react";
 import { useToasts } from "react-toast-notifications";
 export const UserDetails = createContext()
 function Home() {
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+  });
  document.title = "Chat NPT - Home";
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
@@ -19,6 +23,7 @@ function Home() {
   const { addToast } = useToasts();
   const RequestSocket = useCallback(()=>{
     socketIO.on("receive_invitation", (data) => {
+      console.log(socketIO);
       addToast(
         `You received a friend request from ${
           data.user.firstName + " " + data.user.lastName

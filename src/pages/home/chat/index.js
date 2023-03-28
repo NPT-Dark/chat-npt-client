@@ -1,24 +1,30 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Message from "../../../components/layout/message";
 import { CardChat, DataChat } from "../../../Data/testChat";
+import { UserDetails } from "..";
 import "./style.scss"
 import "./response.scss"
 import ChatCard from "../../../components/layout/chatCard";
 import StatusCard from "../../../components/statusCard";
 // import { Mic } from "../../../components/layout/Mic";
 import { SocketIO } from "../../..";
+import Loading from "../../../components/layout/loading";
+import { BaseUrl } from "../../../components/Api/baseUrl";
 function Chat() {
     const {transcript,resetTranscript} = useSpeechRecognition();
     const socketIO = useContext(SocketIO)
     const [active,setActive] = useState(false);
     const [contact,setContact] = useState(CardChat[0])
     const [showPopup,setShowPopup] = useState(true)
-    const [chat,setChat] = useState({
-        id_Room:"123",
-        id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
-        message:""
-    })
+    const userdt = useContext(UserDetails);
+    const [load, setLoad] = useState(false);
+    const [chat,setChat] = useState([]);
+    // const [chat,setChat] = useState({
+    //     id_Room:"123",
+    //     id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
+    //     message:""
+    // })
     function ChatBox(item){
         setContact(item);
         setShowPopup(true);
@@ -37,16 +43,40 @@ function Chat() {
             await socketIO.emit("send_message",chat)
         }
     }
-    useEffect(()=>{
-        socketIO.on("receive_message",(data)=>{
-            console.log(data);
+    const GetChatDetail = async () => {
+        setLoad(true);
+        await BaseUrl.post("/user/getchat", {
+          id_User_Owner:userdt.id,
         })
-        socketIO.on("receive_accept_invitation", async(data) => {
-            console.log(data)
-        });
+          .then(function (response) {
+            setChat(response.data)
+            setLoad(false);
+          })
+          .catch(function (error) {
+            addToast(error.response.data, {
+              appearance: "info",
+              autoDismiss: true,
+            });
+            setLoad(false);
+          });
+      };
+    const SocketResponse = useCallback(async()=>{
+        GetChatDetail();
     },[socketIO])
+    useEffect(()=>{
+        SocketResponse()
+    },[SocketResponse])
+    // useEffect(()=>{
+    //     socketIO.on("receive_message",(data)=>{
+    //         console.log(data);
+    //     })
+    //     socketIO.on("receive_accept_invitation", async(data) => {
+    //         console.log(data)
+    //     });
+    // },[socketIO])
     return (
         <>
+        {load && <Loading />}
         <div className="menu-chat">
             <div className="menu-chat-header">
                 <div className="menu-chat-header-btn">
@@ -62,8 +92,11 @@ function Chat() {
                 <img src="https://cdn-icons-png.flaticon.com/512/6268/6268690.png" className="menu-chat-search-btn" alt="btn-search"/>
             </div>
             <div className="menu-chat-card">
-                {CardChat.map((item)=>(
+                {/* {CardChat.map((item)=>(
                     <ChatCard active={`${item.id === contact.id && "active"}`} status = {item.status} name =  {item.name} message = {item.message} time = {item.time} count = {item.count} image = {item.image} click = {()=>ChatBox(item)}/>
+                ))} */}
+                {chat.map((item)=>(
+                       <ChatCard active={`${item.id === contact.id && "active"}`} name =  {item.firstName + " " + item.lastName} image = {item.avatar} click = {()=>ChatBox(item)}/>
                 ))}
             </div>
         </div> 
