@@ -11,20 +11,22 @@ import StatusCard from "../../../components/statusCard";
 import { SocketIO } from "../../..";
 import Loading from "../../../components/layout/loading";
 import { BaseUrl } from "../../../components/Api/baseUrl";
+import { useToasts } from "react-toast-notifications";
 function Chat() {
     const {transcript,resetTranscript} = useSpeechRecognition();
     const socketIO = useContext(SocketIO)
     const [active,setActive] = useState(false);
-    const [contact,setContact] = useState(CardChat[0])
+    const [contact,setContact] = useState(0)
     const [showPopup,setShowPopup] = useState(true)
     const userdt = useContext(UserDetails);
     const [load, setLoad] = useState(false);
-    const [chat,setChat] = useState([]);
-    // const [chat,setChat] = useState({
-    //     id_Room:"123",
-    //     id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
-    //     message:""
-    // })
+    const [listFriend,setListFriend] = useState([]);
+    const { addToast } = useToasts();
+    const [chat,setChat] = useState({
+        id_Room:"123",
+        id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
+        message:""
+    })
     function ChatBox(item){
         setContact(item);
         setShowPopup(true);
@@ -49,7 +51,8 @@ function Chat() {
           id_User_Owner:userdt.id,
         })
           .then(function (response) {
-            setChat(response.data)
+            setListFriend(response.data)
+            setContact(response.data[0])
             setLoad(false);
           })
           .catch(function (error) {
@@ -95,16 +98,16 @@ function Chat() {
                 {/* {CardChat.map((item)=>(
                     <ChatCard active={`${item.id === contact.id && "active"}`} status = {item.status} name =  {item.name} message = {item.message} time = {item.time} count = {item.count} image = {item.image} click = {()=>ChatBox(item)}/>
                 ))} */}
-                {chat.map((item)=>(
+                {listFriend.map((item)=>(
                        <ChatCard active={`${item.id === contact.id && "active"}`} name =  {item.firstName + " " + item.lastName} image = {item.avatar} click = {()=>ChatBox(item)}/>
                 ))}
             </div>
         </div> 
         <div className={`chatbox ${showPopup && 'activeChatBoxResponse'}`}>
             <header className="chatbox-header">
-                <img className="chatbox-header-img" src={contact.image} alt="img-chatbox"/>
+                <img className="chatbox-header-img" src={contact.avatar} alt="img-chatbox"/>
                 <label className="chatbox-header-label">
-                    <label className="chatbox-header-label-name">{contact.name}</label>
+                    <label className="chatbox-header-label-name">{contact.firstName + " " + contact.lastName}</label>
                     <label className="chatbox-header-label-status" style={{color:`${StatusCard(contact.status).color}`}}>{StatusCard(contact.status).text}</label>
                 </label>
                 <img className="chatbox-header-btn-back" src="https://cdn-icons-png.flaticon.com/512/3925/3925153.png"  alt="img-back" onClick={()=>setShowPopup(false)}/>
