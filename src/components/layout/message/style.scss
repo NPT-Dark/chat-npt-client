@@ -5,8 +5,9 @@
     height: fit-content;
     margin-bottom: 10px;
     &-img-ava{
-        width: 100px;
-        height: 100px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
     }
     &-box{
         display: flex;
@@ -30,10 +31,10 @@
         }
     }
 }
-.message-sent{
+.message-send{
     justify-content: flex-end;
 }
-.message-box-text-sent{
+.message-box-text-send{
     background: #1f2747;
 }
 .message-box-text-receive{

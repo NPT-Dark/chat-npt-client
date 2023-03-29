@@ -8,10 +8,13 @@ import { useEffect } from "react";
 import Loading from "../../../components/layout/loading";
 import { useContext } from "react";
 import { UserDetails } from "..";
+import { SocketIO } from "../../..";
 function Infor() {
   const [data,setData] = useState(null)
   const goto = useNavigate();
   const { addToast } = useToasts();
+  const userdt = useContext(UserDetails);
+  const socketIO = useContext(SocketIO)
   function showMenu() {
     document.getElementById("home-menu").classList.toggle("showMenu");
   }
@@ -25,6 +28,10 @@ function Infor() {
       autoDismiss: true,
     })
     localStorage.clear();
+    socketIO.emit("update_status", {
+      id_User_Owner:  userdt.id,
+      status: 0,
+    });
     setTimeout(()=>goto("/"),2000)
   }
   function ChangeAva(e){

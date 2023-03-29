@@ -49,7 +49,7 @@ function Robot() {
             </header>
             <div className="robot-chat">
                 {DataChat.map((item,index)=>(
-                    <Message key={index} type = {item.type} text = {item.value}>
+                    <Message key={index} type = {item.type} text = {item.value} voice = {true}>
                         <img className="message-img-ava" src="https://cdn-icons-png.flaticon.com/512/3058/3058838.png" alt = "ava"/>
                     </Message>
                 ))}

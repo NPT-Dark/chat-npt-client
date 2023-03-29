@@ -3,21 +3,28 @@ import "./response.scss";
 import { useNavigate } from "react-router-dom";
 import LayoutLoginRegister from "../../components/layout/layoutLoginRegister";
 import { useToasts } from "react-toast-notifications";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { BaseUrl } from "../../components/Api/baseUrl";
 import { useEffect } from "react";
+import { SocketIO } from "../..";
 function Login() {
   document.title = "Chat NPT - Login";
   const goto = useNavigate();
   const { addToast } = useToasts();
   const [user,setUser] = useState({username:"",password:""})
+  const socketIO = useContext(SocketIO)
   useEffect(()=>{
     async function CheckToken(){
       if(localStorage.getItem("token") != null)
       {
         await BaseUrl.post("/user/signin",{
           token:localStorage.getItem("token")
-        }).then(function () {   
+        }).then(async function (res) {   
+          socketIO.emit("join_room",res.data.id)
+          socketIO.emit("update_status", {
+            id_User_Owner: res.data.id,
+            status: 1,
+          });
           goto("/home")
         })
         .catch(function (error) {
@@ -34,7 +41,12 @@ function Login() {
         appearance: 'success',
         autoDismiss: true,
       })      
-      localStorage.setItem("token",response.data)
+      socketIO.emit("join_room",response.data.id)
+      socketIO.emit("update_status", {
+        id_User_Owner: response.data.id,
+        status: 1,
+      });
+      localStorage.setItem("token",response.data.token)
       setTimeout(()=>goto("/home"),2000)
     })
     .catch(function (error) {

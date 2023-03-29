@@ -11,10 +11,6 @@ import { createContext } from "react";
 import { useToasts } from "react-toast-notifications";
 export const UserDetails = createContext()
 function Home() {
-  window.addEventListener('beforeunload', function (e) {
-    e.preventDefault();
-    e.returnValue = '';
-  });
  document.title = "Chat NPT - Home";
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
@@ -23,7 +19,6 @@ function Home() {
   const { addToast } = useToasts();
   const RequestSocket = useCallback(()=>{
     socketIO.on("receive_invitation", (data) => {
-      console.log(socketIO);
       addToast(
         `You received a friend request from ${
           data.user.firstName + " " + data.user.lastName
@@ -58,7 +53,14 @@ function Home() {
             token:localStorage.getItem("token")
           }).then(function (response) {   
             setData(response.data)
-            socketIO.emit("join_room",response.data.id)
+            window.addEventListener('beforeunload', function (e) {
+              socketIO.emit("update_status", {
+                id_User_Owner: response.data.id,
+                status: 0,
+              });
+              e.preventDefault();
+              e.returnValue = '';
+            });
           })
           .catch(function (error) {
               throw new Error(error.message)

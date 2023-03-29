@@ -1,89 +1,91 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import Message from "../../../components/layout/message";
-import { CardChat, DataChat } from "../../../Data/testChat";
 import { UserDetails } from "..";
 import "./style.scss"
 import "./response.scss"
 import ChatCard from "../../../components/layout/chatCard";
 import StatusCard from "../../../components/statusCard";
-// import { Mic } from "../../../components/layout/Mic";
 import { SocketIO } from "../../..";
 import Loading from "../../../components/layout/loading";
 import { BaseUrl } from "../../../components/Api/baseUrl";
 import { useToasts } from "react-toast-notifications";
 function Chat() {
-    const {transcript,resetTranscript} = useSpeechRecognition();
     const socketIO = useContext(SocketIO)
-    const [active,setActive] = useState(false);
-    const [contact,setContact] = useState(0)
+    const [contact,setContact] = useState("")
     const [showPopup,setShowPopup] = useState(true)
     const userdt = useContext(UserDetails);
     const [load, setLoad] = useState(false);
     const [listFriend,setListFriend] = useState([]);
     const { addToast } = useToasts();
-    const [chat,setChat] = useState({
-        id_Room:"123",
-        id_User:"ef5b87bd-eb8a-4f7c-a62f-d41fe5768c11",
-        message:""
-    })
-    function ChatBox(item){
-        setContact(item);
-        setShowPopup(true);
-    }
-    function showMenu(){
-        document.getElementById("home-menu").classList.toggle("showMenu");
-    }
-    function InputChat(e){
-        setChat({
-            ...chat,
-            message:e.target.value
-        })
-    }
+    const [message,setMessage] = useState("")
+    const [listMessage,setLisMessage] = useState([]);
     async function SendChat(e){
         if(e.key === "Enter"){
-            await socketIO.emit("send_message",chat)
+            await socketIO.emit("join_room",contact.id);
+            await socketIO.emit("send_message",{
+                id_User_Send:userdt.id,
+                id_User_Receive:contact.id,
+                Message:message
+            })
+            document.getElementById("input-insert").value = "";
+            setMessage("");
         }
     }
-    const GetChatDetail = async () => {
-        setLoad(true);
+      const GetChatDetail= async () => {
         await BaseUrl.post("/user/getchat", {
           id_User_Owner:userdt.id,
         })
           .then(function (response) {
             setListFriend(response.data)
-            setContact(response.data[0])
-            setLoad(false);
+            if(contact === ""){
+                console.log("aaaa");
+                setContact(response.data[0])
+            }
           })
           .catch(function (error) {
             addToast(error.response.data, {
               appearance: "info",
               autoDismiss: true,
             });
-            setLoad(false);
           });
-      };
+    };
+    const GetListMessage = async () => {
+        await BaseUrl.post("/user/getmessage", {
+            id_User_Owner:userdt.id,
+          })
+            .then(function (response) {
+                setLisMessage(response.data)
+                const element = document.getElementById("chatbox-chat");
+                element.scrollTo(0, element.scrollHeight);
+            })
+            .catch(function (error) {
+                addToast(error, {
+                    appearance: "error",
+                    autoDismiss: true,
+                });
+            })
+    }
     const SocketResponse = useCallback(async()=>{
-        GetChatDetail();
+        socketIO.on("receive_friend_status", async() => {
+           await GetChatDetail();
+        });
+        socketIO.on("receive_message", async() => {
+            await GetListMessage();
+        });
     },[socketIO])
     useEffect(()=>{
         SocketResponse()
     },[SocketResponse])
-    // useEffect(()=>{
-    //     socketIO.on("receive_message",(data)=>{
-    //         console.log(data);
-    //     })
-    //     socketIO.on("receive_accept_invitation", async(data) => {
-    //         console.log(data)
-    //     });
-    // },[socketIO])
+    useEffect(()=>{
+        GetChatDetail();
+        GetListMessage();
+    },[])
     return (
         <>
-        {load && <Loading />}
         <div className="menu-chat">
             <div className="menu-chat-header">
                 <div className="menu-chat-header-btn">
-                    <img src="https://cdn-icons-png.flaticon.com/512/9183/9183113.png" alt="btn-menu" onClick={showMenu}/>
+                    <img src="https://cdn-icons-png.flaticon.com/512/9183/9183113.png" alt="btn-menu" onClick={()=>document.getElementById("home-menu").classList.toggle("showMenu")}/>
                 </div>
                 <div className="menu-chat-header-title">
                     Messages
@@ -99,7 +101,11 @@ function Chat() {
                     <ChatCard active={`${item.id === contact.id && "active"}`} status = {item.status} name =  {item.name} message = {item.message} time = {item.time} count = {item.count} image = {item.image} click = {()=>ChatBox(item)}/>
                 ))} */}
                 {listFriend.map((item)=>(
-                       <ChatCard active={`${item.id === contact.id && "active"}`} name =  {item.firstName + " " + item.lastName} image = {item.avatar} click = {()=>ChatBox(item)}/>
+                       <ChatCard active={`${item.id === contact.id && "active"}`} status = {item.status} name =  {item.firstName + " " + item.lastName} image = {item.avatar} click = {()=>{
+                            setContact(item);
+                            setShowPopup(true);
+                            GetListMessage(item.id)
+                       }}/>
                 ))}
             </div>
         </div> 
@@ -112,27 +118,17 @@ function Chat() {
                 </label>
                 <img className="chatbox-header-btn-back" src="https://cdn-icons-png.flaticon.com/512/3925/3925153.png"  alt="img-back" onClick={()=>setShowPopup(false)}/>
             </header>
-            <div className="chatbox-chat">
-                {DataChat.map((item,index)=>(
-                    <Message key={index} type = {item.type} text = {item.value}>
-                        <img className="message-img-ava" src="https://cdn-icons-png.flaticon.com/512/3058/3058838.png" alt = "ava"/>
-                    </Message>
+            <div className="chatbox-chat" id = "chatbox-chat">
+                {listMessage.map((item,index)=>(
+                    (item.id_User_Send === contact.id || item.id_User_Receive === contact.id) &&
+                    <Message key={index} avatar = {contact.avatar} type = {item.id_User_Send === userdt.id ? "send" : "receive"} text = {item.Message} voice = {false}/>
                 ))}
             </div>
             <div className="chatbox-insert">
                 <div className="chatbox-insert-box">
-                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {InputChat} onKeyUp = {SendChat}/>
+                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>setMessage(e.target.value)} onKeyUp = {SendChat}/>
                     <img className="chatbox-insert-box-voice" src="https://cdn-icons-png.flaticon.com/512/9499/9499020.png" alt="voice"/>
                 </div>
-            </div>
-            <div className={`chatbox-mic-on ${active === true && "show"}`} onClick = {(e)=>{
-                SpeechRecognition.stopListening({continuous:true,language:"vi-VI"})
-                if(e.target.id !== "btn-reset")
-                setActive(false);
-                }}>
-                <img className="chatbox-mic-on-img" src="https://cdn-icons-png.flaticon.com/512/9470/9470620.png" alt="img-mic"/>
-                <button id="btn-reset" onClick={resetTranscript}>Reset</button>
-                <p>{transcript}</p>
             </div>
         </div>
         </>
