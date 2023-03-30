@@ -21,6 +21,7 @@ function Chat() {
     const { addToast } = useToasts();
     const [message,setMessage] = useState("")
     const [listMessage,setLisMessage] = useState([]);
+    const [seen,setSeen] = useState("");
     async function SendChat(e){
         if(e.key === "Enter"){
             await socketIO.emit("join_room",listFriend.active.id);
@@ -69,16 +70,16 @@ function Chat() {
         var count = 0;
         if(listMessage.length > 0){
             listMessage.filter((item)=>{
-                if(item.Seen === false){count++}
+                if(item.Seen === false && item.id_User_Send !== userdt.id){count++}
             })
         }
         return count
     } 
     const GetMessageNew = (id) => {
         const ListMessageFilter = listMessage.filter((item)=>{
-        if(item.id_User_Send === id || item.id_User_Receive === id){
-            return item
-        }
+            if(item.id_User_Send === id){
+                return item
+            }
         })
         var couter = 0;
         ListMessageFilter.filter((item)=>{
@@ -98,10 +99,24 @@ function Chat() {
             time:""
         }
     }
+    const UpdateSeen = async(item) => {
+        await BaseUrl.post("/user/updateseen", {
+            id_User_Send:item,
+            id_User_Receive:userdt.id
+          })
+            .then(function () {
+                GetListMessage();
+                // if(item.id_Message === seen && item.id_User_Send === userdt.id){
+                //     setSeen(listMessage[listMessage.length -1].id_Message)
+                // }
+            })
+            .catch(function (error) {
+        });
+        
+    }
     useEffect(()=>{
         const element = document.getElementById("chatbox-chat");
         element.scrollTo(0, element.scrollHeight);
-        console.log("aaaa");
     },[listMessage])
     useEffect(()=>{
         socketIO.on("receive_friend_status", () => {
@@ -115,6 +130,7 @@ function Chat() {
         GetChatDetail();
         GetListMessage();
         GetMessageNew(listFriend.active.id);
+        GetFullNew();
         const element = document.getElementById("chatbox-chat");
         element.scrollTo(0, element.scrollHeight);
     },[])
@@ -133,6 +149,7 @@ function Chat() {
             <div className="menu-chat-card">
                 {listFriend.list.map((item,index)=>(
                        <ChatCard active={`${item.id === listFriend.active.id && "active"}`} status = {item.status} name =  {item.firstName + " " + item.lastName} image = {item.avatar} message = {GetMessageNew(item.id).message} date = {GetMessageNew(item.id).date} time = {GetMessageNew(item.id).time} count = {GetMessageNew(item.id).count} click = {()=>{
+                            UpdateSeen(item.id)
                             setListFriend({
                                 ...listFriend,
                                 active:item
@@ -156,12 +173,16 @@ function Chat() {
             <div className="chatbox-chat" id = "chatbox-chat">
                 {listMessage.map((item,index)=>(
                     (item.id_User_Send === listFriend.active.id || item.id_User_Receive === listFriend.active.id) &&
-                    <Message key={index} avatar = {listFriend.active.avatar} type = {item.id_User_Send === userdt.id ? "send" : "receive"} text = {item.Message} voice = {false}/>
+                    <Message key={index} avatar = {listFriend.active.avatar} type = {item.id_User_Send === userdt.id ? "send" : "receive"} text = {item.Message} voice = {false} seen = {item.id_Message === seen ? true : false}/>
                 ))}
             </div>
             <div className="chatbox-insert">
                 <div className="chatbox-insert-box">
-                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>setMessage(e.target.value)} onKeyUp = {SendChat}/>
+                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>setMessage(e.target.value)} onKeyUp = {SendChat} onClick = {
+                        ()=>{
+                            UpdateSeen(listFriend.active.id);
+                        }
+                    }/>
                     <img className="chatbox-insert-box-voice" src="https://cdn-icons-png.flaticon.com/512/9499/9499020.png" alt="voice"/>
                 </div>
             </div>
