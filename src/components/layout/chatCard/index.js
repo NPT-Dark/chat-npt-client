@@ -1,7 +1,7 @@
 import StatusCard from "../../statusCard";
 import "./style.scss"
 import "./response.scss"
-function ChatCard({image,active,status,name,message,time,count,click}) {
+function ChatCard({image,active,status,name,message,time,count,click,date}) {
     return ( 
         <div className={`chat-card ${active}`} onClick = {()=>typeof click === "function" && click()}>
             <img className="chat-card-img" src={image} alt = "card-img"/>
@@ -13,6 +13,7 @@ function ChatCard({image,active,status,name,message,time,count,click}) {
                 <p className="chat-card-info-message">{message}</p>
             </div>
             <div className="chat-card-status">
+                <p className="chat-card-status-time">{date}</p>
                 <p className="chat-card-status-time">{time}</p>
                 {count > 0 && <p className="chat-card-status-count">{count}</p>}
             </div>
