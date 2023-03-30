@@ -57,8 +57,6 @@ function Chat() {
           })
             .then(function (response) {
                 setLisMessage(response.data)
-                const element = document.getElementById("chatbox-chat");
-                element.scrollTo(0, element.scrollHeight);
             })
             .catch(function (error) {
                 addToast(error, {
@@ -67,6 +65,15 @@ function Chat() {
                 });
             })
     }
+    const GetFullNew = () => {
+        var count = 0;
+        if(listMessage.length > 0){
+            listMessage.filter((item)=>{
+                if(item.Seen === false){count++}
+            })
+        }
+        return count
+    } 
     const GetMessageNew = (id) => {
         const ListMessageFilter = listMessage.filter((item)=>{
         if(item.id_User_Send === id || item.id_User_Receive === id){
@@ -92,6 +99,11 @@ function Chat() {
         }
     }
     useEffect(()=>{
+        const element = document.getElementById("chatbox-chat");
+        element.scrollTo(0, element.scrollHeight);
+        console.log("aaaa");
+    },[listMessage])
+    useEffect(()=>{
         socketIO.on("receive_friend_status", () => {
             GetChatDetail();
          });
@@ -103,6 +115,8 @@ function Chat() {
         GetChatDetail();
         GetListMessage();
         GetMessageNew(listFriend.active.id);
+        const element = document.getElementById("chatbox-chat");
+        element.scrollTo(0, element.scrollHeight);
     },[])
     return (
         <>
@@ -113,13 +127,9 @@ function Chat() {
                 </div>
                 <div className="menu-chat-header-title">
                     Messages
-                    <p className="menu-chat-header-title-count-new">5</p>
+                    <p className="menu-chat-header-title-count-new">{GetFullNew()}</p>
                 </div>
             </div> 
-            <div className="menu-chat-search">
-                <input type="text" className="menu-chat-search-input" placeholder="Search"/>
-                <img src="https://cdn-icons-png.flaticon.com/512/6268/6268690.png" className="menu-chat-search-btn" alt="btn-search"/>
-            </div>
             <div className="menu-chat-card">
                 {listFriend.list.map((item,index)=>(
                        <ChatCard active={`${item.id === listFriend.active.id && "active"}`} status = {item.status} name =  {item.firstName + " " + item.lastName} image = {item.avatar} message = {GetMessageNew(item.id).message} date = {GetMessageNew(item.id).date} time = {GetMessageNew(item.id).time} count = {GetMessageNew(item.id).count} click = {()=>{
