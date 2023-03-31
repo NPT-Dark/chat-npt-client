@@ -31,5 +31,12 @@ export const itemMenu = [
       url:"https://cdn-icons-png.flaticon.com/512/10075/10075512.png",
       link:"/friend",
       page:<Friends/>
+    },
+    {
+      id:5,
+      name:"Notification",
+      url:"https://cdn-icons-png.flaticon.com/512/3341/3341303.png",
+      link:"/notification",
+      page:<Friends/>
     }
   ]

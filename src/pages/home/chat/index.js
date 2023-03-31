@@ -9,19 +9,34 @@ import { SocketIO } from "../../..";
 import { BaseUrl } from "../../../components/Api/baseUrl";
 import { useToasts } from "react-toast-notifications";
 import { FormatDate } from "../../../components/formatDate";
+import {ListEmoji}  from "../../../Data/Emoji";
 function Chat() {
     const socketIO = useContext(SocketIO)
     const [showPopup,setShowPopup] = useState(true)
     const userdt = useContext(UserDetails);
-    const [index,setIndex] = useState(0)
+    const [index,setIndex] = useState(0);
+    const [showEmoji,setShowEmoji] = useState(false)
     const [listFriend,setListFriend] = useState({
         active:0,
         list:[]
     });
     const { addToast } = useToasts();
     const [message,setMessage] = useState("")
+    const [posi,setPosi] = useState(0);
     const [listMessage,setLisMessage] = useState([]);
     const [seen,setSeen] = useState("");
+    function Position(e){
+        var val = e.target.value;
+        var position = val.slice(0,e.target.selectionStart).length;
+        setPosi(position);
+    }
+    function JoinText(emoji){
+        const element = document.getElementById("input-insert-chat")
+        const str = element.value;
+        let result = str.slice(0,posi)  + emoji + str.slice(posi) ;
+        setMessage(result);
+        document.getElementById("input-insert-chat").value = result;
+    }
     async function SendChat(e){
         if(e.key === "Enter"){
             await socketIO.emit("join_room",listFriend.active.id);
@@ -30,9 +45,10 @@ function Chat() {
                 id_User_Receive:listFriend.active.id,
                 Message:message
             })
-            document.getElementById("input-insert").value = "";
+            document.getElementById("input-insert-chat").value = "";
             setMessage("");
             GetListMessage();
+            setShowEmoji(false)
         }
     }
       const GetChatDetail= async () => {
@@ -44,6 +60,7 @@ function Chat() {
                 active:response.data[index],
                 list:response.data
             })
+            setSeen(response.data[index].id);
           })
           .catch(function (error) {
             addToast(error.response.data, {
@@ -58,6 +75,9 @@ function Chat() {
           })
             .then(function (response) {
                 setLisMessage(response.data)
+                if(response.data.length > 0){
+                    GetSeen(response.data)
+                }
             })
             .catch(function (error) {
                 addToast(error, {
@@ -75,6 +95,17 @@ function Chat() {
         }
         return count
     } 
+    const GetSeen = (list) => {
+        const listMessageFriend = [];
+        list.map((item)=>{
+            if(item.id_User_Send === userdt.id && item.Seen === true){
+                return listMessageFriend.push(item)
+            }
+        })
+        if(listMessageFriend.length > 0){
+            setSeen(listMessageFriend[listMessageFriend.length - 1].id_Message)
+        }
+    }
     const GetMessageNew = (id) => {
         const ListMessageFilter = listMessage.filter((item)=>{
             if(item.id_User_Send === id){
@@ -99,20 +130,12 @@ function Chat() {
             time:""
         }
     }
-    const UpdateSeen = async(item) => {
-        await BaseUrl.post("/user/updateseen", {
-            id_User_Send:item,
-            id_User_Receive:userdt.id
-          })
-            .then(function () {
-                GetListMessage();
-                // if(item.id_Message === seen && item.id_User_Send === userdt.id){
-                //     setSeen(listMessage[listMessage.length -1].id_Message)
-                // }
-            })
-            .catch(function (error) {
-        });
-        
+    const UpdateSeen = async (id) => {
+        await socketIO.emit("join_room",id);
+        await socketIO.emit("send_seen_message",{
+            id_User_Send:userdt.id,
+            id_User_Receive:id
+        })
     }
     useEffect(()=>{
         const element = document.getElementById("chatbox-chat");
@@ -125,18 +148,19 @@ function Chat() {
          socketIO.on("receive_message", () => {
             GetListMessage();
         });
+        socketIO.on("receive_seen_message",()=>{
+            GetListMessage();
+        })
     },[socketIO])
     useEffect(()=>{
         GetChatDetail();
         GetListMessage();
-        GetMessageNew(listFriend.active.id);
-        GetFullNew();
         const element = document.getElementById("chatbox-chat");
         element.scrollTo(0, element.scrollHeight);
     },[])
     return (
         <>
-        <div className="menu-chat">
+        <div className="menu-chat" onClick={()=>setShowEmoji(false)}>
             <div className="menu-chat-header">
                 <div className="menu-chat-header-btn">
                     <img src="https://cdn-icons-png.flaticon.com/512/9183/9183113.png" alt="btn-menu" onClick={()=>document.getElementById("home-menu").classList.toggle("showMenu")}/>
@@ -170,7 +194,7 @@ function Chat() {
                 </label>
                 <img className="chatbox-header-btn-back" src="https://cdn-icons-png.flaticon.com/512/3925/3925153.png"  alt="img-back" onClick={()=>setShowPopup(false)}/>
             </header>
-            <div className="chatbox-chat" id = "chatbox-chat">
+            <div className="chatbox-chat" id = "chatbox-chat" onClick={()=>setShowEmoji(false)}>
                 {listMessage.map((item,index)=>(
                     (item.id_User_Send === listFriend.active.id || item.id_User_Receive === listFriend.active.id) &&
                     <Message key={index} avatar = {listFriend.active.avatar} type = {item.id_User_Send === userdt.id ? "send" : "receive"} text = {item.Message} voice = {false} seen = {item.id_Message === seen ? true : false}/>
@@ -178,12 +202,21 @@ function Chat() {
             </div>
             <div className="chatbox-insert">
                 <div className="chatbox-insert-box">
-                    <textarea className="chatbox-insert-box-input" id = "input-insert" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>setMessage(e.target.value)} onKeyUp = {SendChat} onClick = {
-                        ()=>{
-                            UpdateSeen(listFriend.active.id);
+                    <textarea className="chatbox-insert-box-input" id = "input-insert-chat" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>{setMessage(e.target.value);Position(e)}} onKeyUp = {SendChat} onClick={(e)=>{
+                        UpdateSeen(listFriend.active.id);
+                        GetListMessage(listFriend.active.id)
+                    }}/>
+                    <div className="chatbox-insert-box-emoji">
+                        {showEmoji && <div className="chatbox-insert-box-emoji-list">
+                            {ListEmoji.map((item)=>(
+                                <div className="chatbox-insert-box-emoji-list-item" onClick={()=>JoinText(item)}>
+                                    {item}
+                                </div>
+                            ))}
+                            </div>
                         }
-                    }/>
-                    <img className="chatbox-insert-box-voice" src="https://cdn-icons-png.flaticon.com/512/9499/9499020.png" alt="voice"/>
+                        <img className="chatbox-insert-box-emoji-img" src="https://cdn-icons-png.flaticon.com/512/10263/10263472.png" alt="emoji" onClick={()=>setShowEmoji(!showEmoji)}/>
+                    </div>
                 </div>
             </div>
         </div>
