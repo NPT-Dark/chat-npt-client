@@ -139,7 +139,7 @@ function Chat() {
     }
     useEffect(()=>{
         const element = document.getElementById("chatbox-chat");
-        element.scrollTo(0, element.scrollHeight);
+        listFriend.list.length > 0 && element.scrollTo(0, element.scrollHeight);
     },[listMessage])
     useEffect(()=>{
         socketIO.on("receive_friend_status", () => {
@@ -156,10 +156,10 @@ function Chat() {
         GetChatDetail();
         GetListMessage();
         const element = document.getElementById("chatbox-chat");
-        element.scrollTo(0, element.scrollHeight);
+        listFriend.list.length > 0 && element.scrollTo(0, element.scrollHeight);
     },[])
     return (
-        <>
+    listFriend.list.length > 0 ? <>
         <div className="menu-chat" onClick={()=>setShowEmoji(false)}>
             <div className="menu-chat-header">
                 <div className="menu-chat-header-btn">
@@ -220,7 +220,7 @@ function Chat() {
                 </div>
             </div>
         </div>
-        </>
+        </> : <div className="no-friend">No Friend</div>
      );
 }
 

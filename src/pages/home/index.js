@@ -15,6 +15,8 @@ function Home() {
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
   const [data,setData] = useState()
+  const [noti,setNoti] = useState([])
+  const [showNoti,setShowNoti] = useState(false)
   const socketIO = useContext(SocketIO)
   const { addToast } = useToasts();
   const RequestSocket = useCallback(()=>{
@@ -42,6 +44,16 @@ function Home() {
       });
     });
   },[socketIO])
+  async function FindNotification(id){
+    await BaseUrl.post("/user/getnotification",{
+      id:id
+    }).then(function (response) {   
+      setNoti(response.data)
+    })
+    .catch(function (error) {
+        throw new Error(error.message)
+    });
+  }
   useEffect(()=>{
     var checkToken = false;
     async function Check(){
@@ -51,8 +63,13 @@ function Home() {
         async function GetUser(){
           await BaseUrl.post("/user/getuser",{
             token:localStorage.getItem("token")
-          }).then(function (response) {   
+          }).then(async function (response) {   
             setData(response.data)
+            await FindNotification(response.data.id);
+            socketIO.on("receive_notification", async() => {
+              await FindNotification(response.data.id)
+            });
+            RequestSocket();
             window.addEventListener('beforeunload', function (e) {
               socketIO.emit("update_status", {
                 id_User_Owner: response.data.id,
@@ -71,15 +88,34 @@ function Home() {
     }
     Check()
   },[goto,socketIO])
-  useEffect(()=>{
-    RequestSocket();
-  },[RequestSocket])
   function ActiveItem(item) {
     goto(`/home${item.link}`);
     setActive(item);
   }
   function closeMenu(){
       document.getElementById("home-menu").classList.toggle("showMenu");
+  }
+  function CountNoti(noti){
+    var count = 0
+    noti.filter(item=>{
+      if(item.Seen === false){
+        count++
+      }
+    })
+    return count
+  }
+  async function UpdateNotification(){
+    if(showNoti === false){
+      await BaseUrl.post("/user/updatenotification",{
+        id:data.id
+      }).then(async function (response) { 
+        setNoti(response.data)
+      })
+      .catch(function (error) {
+          throw new Error(error.message)
+      });
+    }
+    setShowNoti(!showNoti)
   }
   return (
     <UserDetails.Provider value={data}>
@@ -94,21 +130,31 @@ function Home() {
               key={"item" + index}
               className={`home-menu-item ${
                 item.id === active.id && "active-item"
-              }`}
+              } ${item.name === "Notification" && "box-notification"}`}
               onClick={() => {
-                ActiveItem(item);
-                closeMenu();
+                item.name !== "Notification" && ActiveItem(item);
+                item.name !== "Notification" && closeMenu();
               }}
             >
-              <img key={"img" + index} src={item.url} alt="img-item" />
-              <div
+              <img className={`${item.name === "Notification" && "shake"}`} key={"img" + index} src={item.url} alt="img-item" onClick={()=>{
+                item.name === "Notification" && UpdateNotification()
+              }}/>
+              {item.name === "Notification" && <label className="count-notification">{CountNoti(noti)}</label>}
+              {(item.name === "Notification" && showNoti === true) && (
+                  <div className="list-notification">
+                    {noti.map((item)=>(
+                      <nav>{item.Message}</nav>
+                    ))}
+                  </div>
+                )}
+              {item.name !== "Notification" && <div
                 key={"title" + index}
                 className={`home-menu-item-title ${
                   item.id === active.id && "active-title"
                 }`}
               >
                 <label key={"name" + index}>{item.name}</label>
-              </div>
+              </div>}
             </nav>
           </>
         ))}

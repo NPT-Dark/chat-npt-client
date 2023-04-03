@@ -14,6 +14,7 @@
         flex-direction: column;
         padding: 20px 0;
         z-index: 1000;
+        
         .close{
             display: none;
         }
@@ -26,6 +27,52 @@
             cursor: pointer;
             margin-bottom: 50px;
             border-right: 3px solid transparent;
+            .count-notification{
+                color: red;
+                font-weight: bold;
+                position: absolute;
+                top: 10px;
+                right: 30px;
+                background: white;
+                border-radius: 50%;
+                padding: 0 5px;
+            }
+            .list-notification{
+                position: absolute;
+                width: 360px;
+                max-height: 350px;
+                overflow: auto;
+                padding-top: 20px;
+                padding-right: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                right: -365px;
+                background: #24305c;
+                color: white;
+                font-size: 17px;
+                &::-webkit-scrollbar{
+                    width: 5px;
+                }
+                &::-webkit-scrollbar-thumb{
+                    border-radius: 5px;
+                    background: #ff6433;
+                }
+                &::-webkit-scrollbar-track{
+                    border-radius: 5px;
+                    background: #292f6b;
+                }
+                nav{
+                    margin-bottom: 10px;
+                    padding: 10px;
+                    border: 1px solid  #202b4f;
+                    width: 100%;
+                }
+            }
+            .shake{
+               animation: shake 0.5s linear infinite;
+            }
             img{
                 width: 90%;
                 height:auto;
@@ -70,4 +117,15 @@
 }
 .active-item{
     border-right: 3px solid #ef5f3c;
+}
+@keyframes shake {
+    0%,20%,40%{
+        transform: rotate(-5deg);
+    }
+    10%,30%{
+        transform: rotate(5deg);
+    }
+    70%,80%,90%,100%{
+        transform: rotate(0);
+    }
 }
