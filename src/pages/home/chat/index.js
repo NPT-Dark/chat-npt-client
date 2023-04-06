@@ -1,19 +1,17 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Message from "../../../components/layout/message";
-import { UserDetails } from "..";
+import { Context } from "..";
 import "./style.scss"
 import "./response.scss"
 import ChatCard from "../../../components/layout/chatCard";
 import StatusCard from "../../../components/statusCard";
-import { SocketIO } from "../../..";
 import { BaseUrl } from "../../../components/Api/baseUrl";
 import { useToasts } from "react-toast-notifications";
 import { FormatDate } from "../../../components/formatDate";
 import {ListEmoji}  from "../../../Data/Emoji";
 function Chat() {
-    const socketIO = useContext(SocketIO)
+    const ctx = useContext(Context)
     const [showPopup,setShowPopup] = useState(true)
-    const userdt = useContext(UserDetails);
     const [index,setIndex] = useState(0);
     const [showEmoji,setShowEmoji] = useState(false)
     const [listFriend,setListFriend] = useState({
@@ -24,6 +22,7 @@ function Chat() {
     const [message,setMessage] = useState("")
     const [posi,setPosi] = useState(0);
     const [listMessage,setLisMessage] = useState([]);
+    const [ava,setAva] = useState("")
     const [seen,setSeen] = useState("");
     function Position(e){
         var val = e.target.value;
@@ -39,9 +38,9 @@ function Chat() {
     }
     async function SendChat(e){
         if(e.key === "Enter"){
-            await socketIO.emit("join_room",listFriend.active.id);
-            await socketIO.emit("send_message",{
-                id_User_Send:userdt.id,
+            await ctx.socket.emit("join_room",listFriend.active.id);
+            await ctx.socket.emit("send_message",{
+                id_User_Send:ctx.user.id,
                 id_User_Receive:listFriend.active.id,
                 Message:message
             })
@@ -53,14 +52,13 @@ function Chat() {
     }
       const GetChatDetail= async () => {
         await BaseUrl.post("/user/getchat", {
-          id_User_Owner:userdt.id,
+          id_User_Owner:ctx.user.id,
         })
           .then(function (response) {
             setListFriend({
                 active:response.data[index],
                 list:response.data
             })
-            setSeen(response.data[index].id);
           })
           .catch(function (error) {
             addToast(error.response.data, {
@@ -71,7 +69,7 @@ function Chat() {
     };
     const GetListMessage = async () => {
         await BaseUrl.post("/user/getmessage", {
-            id_User_Owner:userdt.id,
+            id_User_Owner:ctx.user.id,
           })
             .then(function (response) {
                 setLisMessage(response.data)
@@ -90,7 +88,7 @@ function Chat() {
         var count = 0;
         if(listMessage.length > 0){
             listMessage.filter((item)=>{
-                if(item.Seen === false && item.id_User_Send !== userdt.id){count++}
+                if(item.Seen === false && item.id_User_Send !== ctx.user.id){count++}
             })
         }
         return count
@@ -98,10 +96,22 @@ function Chat() {
     const GetSeen = (list) => {
         const listMessageFriend = [];
         list.map((item)=>{
-            if(item.id_User_Send === userdt.id && item.Seen === true){
+            if(item.id_User_Send === ctx.user.id && item.Seen === true){
                 return listMessageFriend.push(item)
             }
         })
+        for (var item of list){
+            if(item.id_User_Send === ctx.user.id && item.Seen === true){
+                BaseUrl.post("/user/getava",{
+                    id_User_Seen:item.id_User_Receive
+                }).then(function(res){
+                    setAva(res.data)
+                }).catch(function (error) {
+                    throw new Error(error)
+                })
+                break;
+            }
+        }
         if(listMessageFriend.length > 0){
             setSeen(listMessageFriend[listMessageFriend.length - 1].id_Message)
         }
@@ -131,9 +141,9 @@ function Chat() {
         }
     }
     const UpdateSeen = async (id) => {
-        await socketIO.emit("join_room",id);
-        await socketIO.emit("send_seen_message",{
-            id_User_Send:userdt.id,
+        await ctx.socket.emit("join_room",id);
+        await ctx.socket.emit("send_seen_message",{
+            id_User_Send:ctx.user.id,
             id_User_Receive:id
         })
     }
@@ -142,16 +152,16 @@ function Chat() {
         listFriend.list.length > 0 && element.scrollTo(0, element.scrollHeight);
     },[listMessage])
     useEffect(()=>{
-        socketIO.on("receive_friend_status", () => {
+        ctx.socket.on("receive_friend_status", () => {
             GetChatDetail();
          });
-         socketIO.on("receive_message", () => {
+         ctx.socket.on("receive_message", () => {
             GetListMessage();
         });
-        socketIO.on("receive_seen_message",()=>{
+        ctx.socket.on("receive_seen_message",()=>{
             GetListMessage();
         })
-    },[socketIO])
+    },[ctx.socket])
     useEffect(()=>{
         GetChatDetail();
         GetListMessage();
@@ -197,7 +207,7 @@ function Chat() {
             <div className="chatbox-chat" id = "chatbox-chat" onClick={()=>setShowEmoji(false)}>
                 {listMessage.map((item,index)=>(
                     (item.id_User_Send === listFriend.active.id || item.id_User_Receive === listFriend.active.id) &&
-                    <Message key={index} avatar = {listFriend.active.avatar} type = {item.id_User_Send === userdt.id ? "send" : "receive"} text = {item.Message} voice = {false} seen = {item.id_Message === seen ? true : false}/>
+                    <Message key={index} avatar = {listFriend.active.avatar} type = {item.id_User_Send === ctx.user.id ? "send" : "receive"} text = {item.Message} voice = {false} seen = {item.id_Message === seen ? true : false} avaSeen={ava}/>
                 ))}
             </div>
             <div className="chatbox-insert">
@@ -205,6 +215,11 @@ function Chat() {
                     <textarea className="chatbox-insert-box-input" id = "input-insert-chat" placeholder="Type a Message here..." spellCheck ={false} onInput = {(e)=>{setMessage(e.target.value);Position(e)}} onKeyUp = {SendChat} onClick={(e)=>{
                         UpdateSeen(listFriend.active.id);
                         GetListMessage(listFriend.active.id)
+                    }} onKeyDown={(e)=>{
+                     if(e.which === 13) {
+                            e.preventDefault();
+                            return false;
+                        }
                     }}/>
                     <div className="chatbox-insert-box-emoji">
                         {showEmoji && <div className="chatbox-insert-box-emoji-list">

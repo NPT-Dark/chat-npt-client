@@ -1,7 +1,7 @@
 import "./style.scss";
 import "./response.scss";
 import { useSpeechSynthesis } from "react-speech-kit";
-function Message({ avatar, type, text, voice,seen }) {
+function Message({ avatar, type, text, voice,seen,avaSeen }) {
   const { speak, voices } = useSpeechSynthesis();
 
   return (
@@ -33,7 +33,7 @@ function Message({ avatar, type, text, voice,seen }) {
         {(type === "send" && seen === true) && (
           <img
             className="message-content-seen"
-            src="https://i.pinimg.com/736x/9f/14/e7/9f14e7adc6906e63d3168ccdf4fe399b.jpg"
+            src={avaSeen}
             alt="seen"
           />
         )}

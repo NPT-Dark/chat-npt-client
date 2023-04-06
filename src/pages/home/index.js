@@ -2,25 +2,30 @@ import { useCallback, useEffect, useState } from "react";
 import "./style.scss";
 import "./response.scss"
 import { itemMenu } from "../../Data/MenuHome";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CheckLogin } from "../../components/checkLogin";
 import { useContext } from "react";
-import { SocketIO } from "../..";
 import { BaseUrl } from "../../components/Api/baseUrl";
 import { createContext } from "react";
 import { useToasts } from "react-toast-notifications";
-export const UserDetails = createContext()
+import { io } from "socket.io-client";
+export const Context = createContext()
 function Home() {
- document.title = "Chat NPT - Home";
+  document.title = "Chat NPT - Home";
   const goto = useNavigate();
   const [active, setActive] = useState(itemMenu[0]);
   const [data,setData] = useState()
   const [noti,setNoti] = useState([])
+  const lc = useLocation()
+  const [SocketIO,setSocketIO] = useState()
+  useEffect(()=>{
+    if(lc.state.connect === true)
+      setSocketIO( io.connect("http://localhost:2401"))
+  },[])
   const [showNoti,setShowNoti] = useState(false)
-  const socketIO = useContext(SocketIO)
   const { addToast } = useToasts();
-  const RequestSocket = useCallback(()=>{
-    socketIO.on("receive_invitation", (data) => {
+  const RequestSocket = useCallback((SocketIO)=>{
+    SocketIO.on("receive_invitation", (data) => {
       addToast(
         `You received a friend request from ${
           data.user.firstName + " " + data.user.lastName
@@ -31,19 +36,19 @@ function Home() {
         }
       );
     });
-    socketIO.on("receive_accept_invitation", (data) => {
+    SocketIO.on("receive_accept_invitation", (data) => {
       addToast(data, {
         appearance: "info",
         autoDismiss: true,
       });
     });
-    socketIO.on("receive_unfriend", (data) => {
+    SocketIO.on("receive_unfriend", (data) => {
       addToast(data, {
         appearance: "info",
         autoDismiss: true,
       });
     });
-  },[socketIO])
+  },[SocketIO])
   async function FindNotification(id){
     await BaseUrl.post("/user/getnotification",{
       id:id
@@ -66,12 +71,17 @@ function Home() {
           }).then(async function (response) {   
             setData(response.data)
             await FindNotification(response.data.id);
-            socketIO.on("receive_notification", async() => {
+            SocketIO.on("receive_notification", async() => {
               await FindNotification(response.data.id)
             });
-            RequestSocket();
+            SocketIO.emit("join_room",response.data.id)
+            SocketIO.emit("update_status", {
+              id_User_Owner: response.data.id,
+              status: 1,
+            });
+            RequestSocket(SocketIO);
             window.addEventListener('beforeunload', function (e) {
-              socketIO.emit("update_status", {
+              SocketIO.emit("update_status", {
                 id_User_Owner: response.data.id,
                 status: 0,
               });
@@ -87,7 +97,7 @@ function Home() {
       }
     }
     Check()
-  },[goto,socketIO])
+  },[goto])
   function ActiveItem(item) {
     goto(`/home${item.link}`);
     setActive(item);
@@ -118,7 +128,10 @@ function Home() {
     setShowNoti(!showNoti)
   }
   return (
-    <UserDetails.Provider value={data}>
+    <Context.Provider value={{
+      socket:SocketIO,
+      user:data
+    }}>
     <main className="home">
       <div className="home-menu" id = "home-menu">
         <nav className="home-menu-item close">
@@ -136,7 +149,7 @@ function Home() {
                 item.name !== "Notification" && closeMenu();
               }}
             >
-              <img className={`${item.name === "Notification" && "shake"}`} key={"img" + index} src={item.url} alt="img-item" onClick={()=>{
+              <img className={`${(item.name === "Notification" && CountNoti(noti) > 0) && "shake"}`} key={"img" + index} src={item.url} alt="img-item" onClick={()=>{
                 item.name === "Notification" && UpdateNotification()
               }}/>
               {item.name === "Notification" && <label className="count-notification">{CountNoti(noti)}</label>}
@@ -161,7 +174,7 @@ function Home() {
       </div>
       <div className="home-page">{active.page}</div>
     </main>
-    </UserDetails.Provider>
+    </Context.Provider>
   );
 }
 

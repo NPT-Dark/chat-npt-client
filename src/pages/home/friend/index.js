@@ -6,8 +6,7 @@ import "./style.scss";
 import { useEffect } from "react";
 import Loading from "../../../components/layout/loading";
 import { Gender } from "../../../components/textGender";
-import { SocketIO } from "../../..";
-import { UserDetails } from "..";
+import { Context } from "..";
 import Modal from "../../../components/layout/modal/modal";
 function Friends() {
   const { addToast } = useToasts();
@@ -20,8 +19,7 @@ function Friends() {
     name:""
   });
   const [select,setSelect] = useState("find")
-  const socketIO = useContext(SocketIO);
-  const userdt = useContext(UserDetails);
+  const ctx = useContext(Context);
   function InputSearch(e) {
     setData(e.target.value);
   }
@@ -30,7 +28,7 @@ function Friends() {
     await BaseUrl.post("/user/finduser", {
       firstName: data.split(" ")[0] || "",
       lastName: data.split(" ")[1] || "",
-      id: userdt.id,
+      id: ctx.user.id,
       type:select
     })
       .then(function (response) {
@@ -48,9 +46,9 @@ function Friends() {
   };
   //Socket IO
   async function AddFriends(id, firstName, lastName) {
-    await socketIO.emit("join_room", id);
-    await socketIO.emit("send_invitation", {
-      id_User_Send: userdt.id,
+    await ctx.socket.emit("join_room", id);
+    await ctx.socket.emit("send_invitation", {
+      id_User_Send: ctx.user.id,
       id_User_Recieve: id,
     });
     await findFriends();
@@ -63,10 +61,10 @@ function Friends() {
     );
   }
   async function CancelFriend(id,type) {
-    await socketIO.emit("join_room", id);
-    await socketIO.emit("send_cancel_invitation", {
-      id_User_Recieve: type === "cancel" ? id : userdt.id,
-      id_User_Send: type === "cancel" ? userdt.id : id,
+    await ctx.socket.emit("join_room", id);
+    await ctx.socket.emit("send_cancel_invitation", {
+      id_User_Recieve: type === "cancel" ? id : ctx.user.id,
+      id_User_Send: type === "cancel" ? ctx.user.id : id,
     });
     await findFriends();
     addToast(`Cancel successfull !`, {
@@ -75,9 +73,9 @@ function Friends() {
     });
   }
   async function AcceptFriend(id_Add){
-    await socketIO.emit("join_room", id_Add);
-    await socketIO.emit("accept_invitation",{
-      id_User_Owner:userdt.id,
+    await ctx.socket.emit("join_room", id_Add);
+    await ctx.socket.emit("accept_invitation",{
+      id_User_Owner:ctx.user.id,
       id_User_Add:id_Add,
     });
     await findFriends();
@@ -87,9 +85,9 @@ function Friends() {
     });
   }
   async function Unfriend(){
-    await socketIO.emit("join_room", unfriend.id);
-    await socketIO.emit("send_unfriend",{
-      id_User_Owner:userdt.id,
+    await ctx.socket.emit("join_room", unfriend.id);
+    await ctx.socket.emit("send_unfriend",{
+      id_User_Owner:ctx.user.id,
       id_User_Unfriend:unfriend.id,
     });
     await findFriends();
@@ -105,19 +103,19 @@ function Friends() {
   }
   
   const SocketResponse = useCallback(()=>{
-    socketIO.on("receive_cancel_invitation", async() => {
+    ctx.socket.on("receive_cancel_invitation", async() => {
       await findFriends();
     });
-    socketIO.on("receive_accept_invitation", async() => {
+    ctx.socket.on("receive_accept_invitation", async() => {
       await findFriends();
     });
-    socketIO.on("receive_invitation", async() => {
+    ctx.socket.on("receive_invitation", async() => {
       await findFriends();
     });
-    socketIO.on("receive_unfriend", async() => {
+    ctx.socket.on("receive_unfriend", async() => {
       await findFriends();
     });
-  },[socketIO])
+  },[ctx.socket])
   useEffect(() => {
     SocketResponse();
   }, [SocketResponse]);
@@ -132,6 +130,7 @@ function Friends() {
         status:false
       })}/>}
       <div className="friend">
+      <img src="https://cdn-icons-png.flaticon.com/512/9183/9183113.png" className="friend-btn-menu" alt="btn-menu" onClick={()=>document.getElementById("home-menu").classList.toggle("showMenu")}/>
         <div className="friend-header">
           <div className="friend-header-search">
             <input
