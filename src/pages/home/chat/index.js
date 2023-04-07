@@ -103,7 +103,7 @@ function Chat() {
         for (var item of list){
             if(item.id_User_Send === ctx.user.id && item.Seen === true){
                 BaseUrl.post("/user/getava",{
-                    id_User_Seen:item.id_User_Receive
+                    id_User_Seen:listFriend.active.id
                 }).then(function(res){
                     setAva(res.data)
                 }).catch(function (error) {
